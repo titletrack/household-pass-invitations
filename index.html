@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06231d">
+  <title>Join a Household · Household Pass</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #06231d; color: #f4f5f1; }
+    body { box-sizing: border-box; margin: 0 auto; max-width: 34rem; min-height: 100vh; padding: 2rem 1.25rem; display: grid; align-content: center; }
+    main { border: 1px solid #285347; border-radius: 1.5rem; background: #0b3027; padding: clamp(1.5rem, 7vw, 2.5rem); }
+    h1 { font-family: Georgia, serif; font-size: clamp(2rem, 9vw, 2.7rem); line-height: 1.08; margin: 0 0 1rem; }
+    p { color: #c7d6d0; line-height: 1.55; }
+    a, button { box-sizing: border-box; display: block; width: 100%; border: 0; border-radius: 999px; padding: 1rem 1.2rem; font: inherit; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; }
+    .open { margin-top: 1.5rem; background: #78e4bf; color: #06231d; }
+    .store { margin-top: .75rem; border: 1px solid #4a796b; color: #8de8c5; }
+    .code-wrap { margin-top: 1.5rem; padding: 1rem; border-radius: 1rem; background: #06231d; }
+    .label { margin: 0 0 .5rem; color: #9db8ae; font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    code { display: block; overflow-wrap: anywhere; color: #fff; font: 600 1rem/1.6 ui-monospace, monospace; }
+    .copy { margin-top: .75rem; padding: .7rem; background: transparent; color: #8de8c5; }
+    #status { min-height: 1.5em; margin: .25rem 0 0; text-align: center; font-size: .9rem; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Join a Household Pass household</h1>
+    <p>Open this invitation in Household Pass to create your account and join the household.</p>
+    <p id="invalid" hidden>This invitation link is incomplete. Ask the household parent to send a new invitation.</p>
+    <a id="open" class="open" hidden>Open invitation in Household Pass</a>
+    <a id="store" class="store" href="https://play.google.com/store/apps/details?id=com.householdpass" hidden>Get Household Pass on Google Play</a>
+    <section class="code-wrap" id="code-wrap" hidden aria-live="polite">
+      <p class="label">Invitation code</p>
+      <code id="code"></code>
+      <button class="copy" id="copy" type="button">Copy code</button>
+      <p id="status" role="status"></p>
+    </section>
+    <p id="help" hidden>If the app does not open, install it from Google Play, return to this page, and enter the invitation code in the app.</p>
+  </main>
+  <script>
+    (() => {
+      const token = new URLSearchParams(location.search).get('token') || '';
+      const valid = /^[0-9a-f]{64}$/i.test(token);
+      const invalid = document.getElementById('invalid');
+      if (!valid) { invalid.hidden = false; return; }
+
+      const storeUrl = 'https://play.google.com/store/apps/details?id=com.householdpass';
+      const intent = `intent://invite?token=${encodeURIComponent(token)}#Intent;scheme=householdpass;package=com.householdpass;S.browser_fallback_url=${encodeURIComponent(storeUrl)};end`;
+      const open = document.getElementById('open');
+      open.href = intent;
+      open.hidden = false;
+      document.getElementById('store').hidden = false;
+      document.getElementById('code-wrap').hidden = false;
+      document.getElementById('help').hidden = false;
+      document.getElementById('code').textContent = token;
+      document.getElementById('copy').addEventListener('click', async () => {
+        const status = document.getElementById('status');
+        try {
+          await navigator.clipboard.writeText(token);
+          status.textContent = 'Invitation code copied.';
+        } catch {
+          status.textContent = 'Select and copy the invitation code above.';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
